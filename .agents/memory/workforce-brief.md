@@ -9,6 +9,12 @@ Use only public or synthetic data in the demo. Do not accept real CVs or persona
 
 **How to apply:** New intake features must remain synthetic unless the user explicitly changes the product's scope. Market signals must be refreshable, traceable and distinguish observed evidence from scenario assumptions.
 
+CV selection is a local-only demo, not permission to store or process CVs. Keep the synthetic-data boundary.
+
+**Why:** When offered local-only selection versus private server storage, the user explicitly chose “select a file, but don’t send or save it.”
+
+**How to apply:** Do not extend the picker into document reading, CV extraction, cloud storage or uploads without a new explicit scope decision.
+
 Use transparent rule-based matching rather than claiming an LLM powers the app.
 
 **Why:** Explainable skill overlap and dated public signals meet the proof-of-concept needs without introducing fabricated career advice. Scores are planning aids, not hiring probabilities.

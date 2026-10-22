@@ -1,3 +1,4 @@
+import { Link } from 'wouter';
 import { RefreshCw, TrendingUp, TrendingDown, ExternalLink } from 'lucide-react';
 import { useFP } from '@/lib/store';
 import { Head, Skel, ErrorBox, Meter, Empty, fmt } from '@/components/bits';
@@ -6,6 +7,7 @@ export default function Radar() {
   const s = signals.data;
   return (<div>
     <Head kicker="Signal radar" title="What public job posts mention" sub="Scores are keyword mention share across a sample of postings. They are not growth rates." />
+    <p className="text-sm text-muted-foreground mb-4">For wider official context, see the <Link href="/global-skills-tracker" className="underline" data-testid="link-radar-tracker">Global Skills Tracker</Link>. It is external and does not feed these scores.</p>
     <button onClick={() => refresh.mutate()} disabled={refresh.isPending} data-testid="button-refresh" className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm disabled:opacity-60"><RefreshCw size={15} className={refresh.isPending ? 'animate-spin' : ''} />{refresh.isPending ? 'Refreshing' : 'Refresh signals'}</button>
     {refresh.isError && <div className="mb-4"><ErrorBox msg="Refresh failed. Showing previous data." /></div>}
     {signals.isLoading ? <Skel n={4} h="h-14" /> : signals.isError || !s ? <ErrorBox msg="Signals could not be loaded." retry={() => signals.refetch()} /> : (<div className="space-y-8">

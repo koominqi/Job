@@ -30,6 +30,7 @@ export default function Home() {
           <h3 className="font-display text-xl mb-4">Top matches</h3>
           <div className="grid md:grid-cols-3 gap-4">{top.slice(0, 3).map((m) => (<Link key={m.role.id} href="/matches" className="lift block rounded-xl border p-4" data-testid={`card-match-${m.role.id}`}><div className="flex justify-between"><b>{m.role.title}</b><span className="font-mono text-sm">{Math.round(m.score)}</span></div><Meter v={m.score} /><p className="text-xs text-muted-foreground mt-2">Missing: {m.missingSkills.slice(0, 3).map(skillName).join(', ') || 'none'}</p></Link>))}</div>
         </section>
+        <p className="md:col-span-5 text-sm text-muted-foreground">Want wider context? <Link href="/global-skills-tracker" className="underline" data-testid="link-home-tracker">Explore the Global Skills Tracker</Link> (external UNESCO-UNEVOC source, not part of your scores).</p>
         <p className="md:col-span-5 text-xs text-muted-foreground" data-testid="text-signal-status">Signals: {signals.data ? `${signals.data.status}, fetched ${signals.data.fetchedAt}` : 'loading'}. {match.data?.methodology}</p>
       </div>)}
   </div>);
