@@ -1,7 +1,7 @@
 import { Link } from 'wouter';
 import { Check, ExternalLink } from 'lucide-react';
 import { useFP } from '@/lib/store';
-import { Head, Empty, Meter, Skel, ErrorBox, LearningBadges } from '@/components/bits';
+import { Head, Empty, Skel, ErrorBox, LearningBadges, LearningProgress } from '@/components/bits';
 import { useLanguage } from '@/lib/i18n';
 import { pathwaySummary } from '@/lib/i18n/career-text';
 export default function Pathway() {
@@ -11,7 +11,6 @@ export default function Pathway() {
   if (path.isError && roleId && !p) return <div><Head kicker="Pathway" title="Plan unavailable" /><ErrorBox msg="Pathway could not be generated." retry={() => selectRole(roleId)} /></div>;
   if (!p) return <div><Head kicker="Pathway" title="No pathway yet" /><Empty title="Choose a role first" body="Your ordered learning plan appears here once you pick a role."><Link href="/matches" className="btn-primary" data-testid="link-go-matches">{t('Go to matches')}</Link></Empty></div>;
   const completed = p.steps.filter((step) => done.includes(step.id)).length;
-  const pct = Math.round((completed / Math.max(1, p.steps.length)) * 100);
   return (<div>
     <Head kicker="Pathway" title={p.role.title} sub={pathwaySummary(p.summary, t)} />
     <section className="mb-6 rounded-xl border border-accent/50 bg-accent/5 p-5" aria-labelledby="auto-update-heading">
@@ -19,7 +18,7 @@ export default function Pathway() {
       <p className="mt-2 text-sm">{t('When the app fetches a new Remotive snapshot—when its cache expires or after you refresh Signals on Radar—role matches are recalculated and your chosen pathway is reordered to prioritise missing skills mentioned more often. Completed lessons are preserved.')}</p>
       <p className="mt-2 text-xs text-muted-foreground">{t('This uses a global remote-job sample, not Malaysian market statistics or a dedicated AI-research feed. Mentions are estimates, not forecasts.')}</p>
     </section>
-    <div className="rounded-2xl border bg-card shadow-sm p-5 mb-6"><div className="flex flex-wrap gap-2 justify-between text-sm mb-2"><span data-testid="text-progress">{t('{done} of {total} steps, {percent}%', { done: completed, total: p.steps.length, percent: pct })}</span><span className="font-mono">{t('{hours}h over {weeks} weeks', { hours: p.totalHours, weeks: p.totalWeeks })}</span></div><Meter v={pct} color="bg-accent" /></div>
+     <LearningProgress completed={completed} total={p.steps.length} hours={p.totalHours} weeks={p.totalWeeks} />
     <LearningBadges earned={earnedBadges} completed={completed} total={p.steps.length} />
     <ol className="relative border-l-2 border-primary/30 ml-3 space-y-5">{p.steps.map((s, i) => { const d = done.includes(s.id); return (
       <li key={s.id} className="pl-6 relative rise" style={{ animationDelay: `${i * 60}ms` }} data-testid={`step-${s.id}`}>

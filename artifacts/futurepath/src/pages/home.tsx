@@ -1,7 +1,7 @@
 import { Link } from 'wouter';
 import { ArrowRight } from 'lucide-react';
 import { useFP } from '@/lib/store';
-import { Head, Skel, ErrorBox, Meter, LearningBadges } from '@/components/bits';
+import { Head, Skel, ErrorBox, Meter, LearningBadges, LearningProgress } from '@/components/bits';
 import { useLanguage } from '@/lib/i18n';
 import { matchExplanation } from '@/lib/i18n/career-text';
 export default function Home() {
@@ -10,7 +10,6 @@ export default function Home() {
   const top = match.data?.matches ?? [];
   const next = pathway?.steps.find((s) => !done.includes(s.id));
   const completed = pathway ? pathway.steps.filter((step) => done.includes(step.id)).length : 0;
-  const pct = pathway ? Math.round((completed / Math.max(1, pathway.steps.length)) * 100) : 0;
   const lead = top[0];
   return (<div>
     <Head kicker="Overview" title="Hello Alex. Here is where you stand." sub="Alex is a clearly labelled synthetic profile. Edit it in Profile to see your own picture." />
@@ -26,8 +25,8 @@ export default function Home() {
           <p className="font-mono text-xs uppercase tracking-widest text-primary">{t('Next action')}</p>
           {next ? (<><h3 className="font-display text-2xl mt-2" translate="no">{next.title}</h3><p className="text-sm text-muted-foreground mt-1">{t('{hours}h, weeks {start}-{end}, {provider}', { hours: next.hours, start: next.weekStart, end: next.weekEnd, provider: next.provider })}</p>
             <div className="flex gap-2 mt-4 flex-wrap"><a href={next.url} target="_blank" rel="noreferrer" className="btn-primary" data-testid="link-next-course">{t('Open course')}</a><button onClick={() => toggle(next.id)} className="btn-quiet" data-testid="button-next-done">{t('Mark done')}</button></div>
-            <div className="mt-5"><Meter v={pct} /><p className="text-xs mt-1 text-muted-foreground">{t('{percent}% of pathway', { percent: pct })}</p></div></>)
-          : pathway ? <p className="mt-2">{t('Pathway complete. Well done.')}</p>
+            {pathway && <LearningProgress compact completed={completed} total={pathway.steps.length} hours={pathway.totalHours} weeks={pathway.totalWeeks} />}</>)
+          : pathway ? <LearningProgress compact completed={completed} total={pathway.steps.length} hours={pathway.totalHours} weeks={pathway.totalWeeks} />
           : (<><h3 className="font-display text-2xl mt-2">{t('Pick a role to start')}</h3><p className="text-sm text-muted-foreground mt-1">{t('Choose from your matches and we will build an ordered plan.')}</p><Link href="/matches" className="btn-primary mt-4" data-testid="link-see-matches">{t('See matches')} <ArrowRight size={14} /></Link></>)}
         </section>
         <section className="md:col-span-5 rounded-3xl border bg-card p-6 md:p-8 shadow-sm">
