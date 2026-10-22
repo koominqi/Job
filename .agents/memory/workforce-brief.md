@@ -1,0 +1,16 @@
+---
+name: Workforce brief boundaries
+description: Product guardrails from the supplied Aiversecity challenge brief and recommendation approach.
+---
+
+Use only public or synthetic data in the demo. Do not accept real CVs or personal information. Retain source citations, dates, uncertainty disclosure and human control over career decisions.
+
+**Why:** The supplied Aiversecity workforce challenge explicitly requires these boundaries and prohibits invented jobs, courses and statistics.
+
+**How to apply:** New intake features must remain synthetic unless the user explicitly changes the product's scope. Market signals must be refreshable, traceable and distinguish observed evidence from scenario assumptions.
+
+Use transparent rule-based matching rather than claiming an LLM powers the app.
+
+**Why:** Explainable skill overlap and dated public signals meet the proof-of-concept needs without introducing fabricated career advice. Scores are planning aids, not hiring probabilities.
+
+**How to apply:** If introducing an LLM later, disclose the model, ground output in verified sources and preserve the explainable score breakdown.

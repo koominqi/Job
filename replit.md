@@ -1,6 +1,6 @@
-# [Project name]
+# FuturePath
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A career-planning proof of concept for the Aiversecity future-ready workforce challenge: synthetic profiles, explainable career matches, public trend signals and SDG-linked reskilling plans.
 
 ## Run & Operate
 
@@ -30,7 +30,9 @@ _Populate as you build — non-obvious choices a reader couldn't infer from the 
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+The demo covers skills intake, a public job-posting radar, moderate/fast disruption scenarios, explainable role matching, ordered learning pathways with browser-local progress, and SDG mapping.
+
+The Remotive feed represents global remote jobs, not the Malaysian labour market. Skill mention share is not measured growth. Role outlooks, scenario penalties and study durations are disclosed planning assumptions. No language model is used. Profiles and progress stay in this browser; they do not sync across devices.
 
 ## User preferences
 

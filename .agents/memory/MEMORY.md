@@ -1,0 +1,1 @@
+- [Workforce brief boundaries](workforce-brief.md) — synthetic-only demo, sourced signals, disclosed scenario assumptions and explainable rule-based matching.

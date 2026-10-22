@@ -11,6 +11,60 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /career/catalog:
+    get:
+      operationId: getCareerCatalog
+      responses:
+        "200":
+          description: Skills, roles and SDGs
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Catalog" }
+  /career/signals:
+    get:
+      operationId: getCareerSignals
+      responses:
+        "200":
+          description: Dated public signals
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SignalReport" }
+    post:
+      operationId: refreshCareerSignals
+      responses:
+        "200":
+          description: Refreshed signals
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SignalReport" }
+  /career/matches:
+    post:
+      operationId: matchCareerRoles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProfileInput" }
+      responses:
+        "200":
+          description: Ranked explainable matches
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MatchReport" }
+  /career/pathway:
+    post:
+      operationId: createCareerPathway
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PathwayInput" }
+      responses:
+        "200":
+          description: Ordered learning plan
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Pathway" }
   /healthz:
     get:
       operationId: healthCheck
@@ -26,6 +80,135 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   schemas:
+    Skill:
+      type: object
+      required: [id, name, category, sdgs, keywords]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        category: { type: string }
+        sdgs: { type: array, items: { type: integer } }
+        keywords: { type: array, items: { type: string } }
+    Role:
+      type: object
+      required: [id, title, description, sector, skills, sdgs, sourceUrl, outlook, impact]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        sector: { type: string }
+        skills: { type: array, items: { type: string } }
+        sdgs: { type: array, items: { type: integer } }
+        sourceUrl: { type: string }
+        outlook: { type: string, enum: [rising, declining] }
+        impact: { type: string }
+    Sdg:
+      type: object
+      required: [id, title, color, url]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        color: { type: string }
+        url: { type: string }
+    Catalog:
+      type: object
+      required: [skills, roles, sdgs, methodology]
+      properties:
+        skills: { type: array, items: { $ref: "#/components/schemas/Skill" } }
+        roles: { type: array, items: { $ref: "#/components/schemas/Role" } }
+        sdgs: { type: array, items: { $ref: "#/components/schemas/Sdg" } }
+        methodology: { type: string }
+    Signal:
+      type: object
+      required: [id, title, source, url, publishedAt, skills]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        source: { type: string }
+        url: { type: string }
+        publishedAt: { type: string }
+        skills: { type: array, items: { type: string } }
+    SkillDemand:
+      type: object
+      required: [skillId, mentions, share]
+      properties:
+        skillId: { type: string }
+        mentions: { type: integer }
+        share: { type: number }
+    SignalReport:
+      type: object
+      required: [status, fetchedAt, sourceUrl, sourceName, totalJobs, signals, demand, warning, methodology]
+      properties:
+        status: { type: string, enum: [live, cached, unavailable] }
+        fetchedAt: { type: string }
+        sourceUrl: { type: string }
+        sourceName: { type: string }
+        totalJobs: { type: integer }
+        signals: { type: array, items: { $ref: "#/components/schemas/Signal" } }
+        demand: { type: array, items: { $ref: "#/components/schemas/SkillDemand" } }
+        warning: { type: string }
+        methodology: { type: string }
+    ProfileInput:
+      type: object
+      required: [skills, interests, experienceYears, weeklyHours, scenario]
+      properties:
+        skills: { type: array, items: { type: string }, maxItems: 30 }
+        interests: { type: array, items: { type: string }, maxItems: 10 }
+        experienceYears: { type: integer, minimum: 0, maximum: 50 }
+        weeklyHours: { type: integer, minimum: 1, maximum: 40 }
+        scenario: { type: string, enum: [moderate, fast] }
+    RoleMatch:
+      type: object
+      required: [role, score, matchedSkills, missingSkills, readinessScore, interestScore, demandScore, explanation, signalIds]
+      properties:
+        role: { $ref: "#/components/schemas/Role" }
+        score: { type: integer }
+        matchedSkills: { type: array, items: { type: string } }
+        missingSkills: { type: array, items: { type: string } }
+        readinessScore: { type: integer }
+        interestScore: { type: integer }
+        demandScore: { type: integer }
+        explanation: { type: string }
+        signalIds: { type: array, items: { type: string } }
+    MatchReport:
+      type: object
+      required: [matches, scenario, methodology, signalStatus]
+      properties:
+        matches: { type: array, items: { $ref: "#/components/schemas/RoleMatch" } }
+        scenario: { type: string }
+        methodology: { type: string }
+        signalStatus: { type: string }
+    PathwayInput:
+      type: object
+      required: [profile, roleId]
+      properties:
+        profile: { $ref: "#/components/schemas/ProfileInput" }
+        roleId: { type: string }
+    LearningStep:
+      type: object
+      required: [id, title, skillId, hours, weekStart, weekEnd, provider, url, cost, sdgs, outcome]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        skillId: { type: string }
+        hours: { type: integer }
+        weekStart: { type: integer }
+        weekEnd: { type: integer }
+        provider: { type: string }
+        url: { type: string }
+        cost: { type: string }
+        sdgs: { type: array, items: { type: integer } }
+        outcome: { type: string }
+    Pathway:
+      type: object
+      required: [role, steps, totalHours, totalWeeks, summary, disclaimer]
+      properties:
+        role: { $ref: "#/components/schemas/Role" }
+        steps: { type: array, items: { $ref: "#/components/schemas/LearningStep" } }
+        totalHours: { type: integer }
+        totalWeeks: { type: integer }
+        summary: { type: string }
+        disclaimer: { type: string }
     HealthStatus:
       type: object
       properties:

@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "FuturePath"
+description = "A future-ready career companion for Malaysia: discover emerging skills, get explainable career matches, and follow SDG-linked learning pathways using public trend signals and synthetic profiles."
+version = "1.0.0"
+id = "artifacts/futurepath"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20923
+
+[services.development]
+run = "pnpm --filter @workspace/futurepath run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/futurepath", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/futurepath/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20923"
+BASE_PATH = "/"
