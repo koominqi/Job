@@ -1,0 +1,11 @@
+[
+  {"id":"d2118b53-58bb-4794-93a8-37511616e201","position":1,"filepath":"src/pages/slides/Introduction.tsx","title":"FuturePath — Your skills today. Your possibilities tomorrow.","description":"Introduction to FuturePath and its career-planning purpose.","speakerNotes":""},
+  {"id":"d2118b53-58bb-4794-93a8-37511616e202","position":2,"filepath":"src/pages/slides/Problem.tsx","title":"The problem: career decisions are getting harder","description":"The workforce problem and need for evidence-based, personal guidance.","speakerNotes":""},
+  {"id":"d2118b53-58bb-4794-93a8-37511616e203","position":3,"filepath":"src/pages/slides/TargetUsers.tsx","title":"Who FuturePath is designed to support","description":"Target audiences and the scope of the individual demo.","speakerNotes":""},
+  {"id":"d2118b53-58bb-4794-93a8-37511616e204","position":4,"filepath":"src/pages/slides/WebsiteJourney.tsx","title":"How to use the website: one connected journey","description":"Five connected stages from profile to SDG impact.","speakerNotes":""},
+  {"id":"d2118b53-58bb-4794-93a8-37511616e205","position":5,"filepath":"src/pages/slides/SkillsProfile.tsx","title":"Step 1 — Build a skills profile","description":"Set skills, interests, experience, learning time and scenario.","speakerNotes":""},
+  {"id":"d2118b53-58bb-4794-93a8-37511616e206","position":6,"filepath":"src/pages/slides/SignalRadar.tsx","title":"Step 2 — Explore the signal radar","description":"Refresh public signals and understand source coverage and uncertainty.","speakerNotes":""},
+  {"id":"d2118b53-58bb-4794-93a8-37511616e207","position":7,"filepath":"src/pages/slides/RoleMatches.tsx","title":"Step 3 — Understand your role matches","description":"Inspect role scores, strengths and skills gaps before choosing a plan.","speakerNotes":""},
+  {"id":"d2118b53-58bb-4794-93a8-37511616e208","position":8,"filepath":"src/pages/slides/LearningPathway.tsx","title":"Step 4 — Follow a practical learning pathway","description":"Use learning resources and track progress with realistic study estimates.","speakerNotes":""},
+  {"id":"d2118b53-58bb-4794-93a8-37511616e209","position":9,"filepath":"src/pages/slides/Purpose.tsx","title":"Build a future-ready career with purpose","description":"SDG contribution, transparent recommendations and human-centred boundaries.","speakerNotes":""}
+]

@@ -1,0 +1,55 @@
+@import 'tailwindcss';
+
+@theme inline {
+  --color-primary: var(--slide-primary);
+  --color-accent: var(--slide-accent);
+  --color-bg: var(--slide-bg);
+  --color-text: var(--slide-text);
+  --color-muted: var(--slide-muted);
+  --font-display: var(--font-display-family);
+  --font-body: var(--font-body-family);
+}
+
+:root {
+  /* Replace these with brand colors */
+  --slide-primary: #da341b;
+  --slide-accent: #2a6f66;
+  --slide-bg: #f8f4ed;
+  --slide-text: #11242c;
+  --slide-muted: #526269;
+  --font-display-family: 'Fraunces', Georgia, serif;
+  --font-body-family: 'DM Sans', sans-serif;
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--slide-bg);
+  color: var(--slide-text);
+}
+
+.slide {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.slide-viewer {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.deck-frame { background: radial-gradient(ellipse at top left, #fdfaf5, var(--slide-bg) 72%); }
+.deck-title { font-family: var(--font-display-family); font-size: 4vw; font-weight: 600; line-height: 1.13; text-wrap: balance; margin: 0; }
+.deck-copy { font-size: 2.1vw; line-height: 1.32; text-wrap: pretty; }
+.deck-list { font-size: 2vw; line-height: 1.28; display: flex; flex-direction: column; gap: 2.1vh; padding-left: 1.7vw; margin: 0; list-style-type: disc; }
+.deck-list li::marker { color: var(--slide-primary); }
+.screen { width: 100%; height: 100%; object-fit: contain; object-position: center; }
