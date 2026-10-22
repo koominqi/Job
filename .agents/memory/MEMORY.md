@@ -1,1 +1,2 @@
 - [Workforce brief boundaries](workforce-brief.md) — synthetic-only demo, sourced signals, disclosed scenario assumptions and explainable rule-based matching.
+- [Localization boundaries](localization-boundaries.md) — translate owned guidance, preserve original source titles, and keep language changes independent of career data.

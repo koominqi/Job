@@ -14,25 +14,26 @@ import Pathway from '@/pages/pathway';
 import Profile from '@/pages/profile';
 import Impact from '@/pages/impact';
 import GlobalSkillsTracker from '@/pages/global-skills-tracker';
+import { LanguageProvider, useLanguage } from '@/lib/i18n';
 
 const queryClient = new QueryClient();
 
 function RoutedErrorBoundary({ children }: { children: ReactNode }) {
   const [location] = useLocation();
+  const { t } = useLanguage();
   useEffect(() => {
     const titles: Record<string, string> = { '/': 'Overview', '/radar': 'Signal radar', '/matches': 'Role matches', '/pathway': 'Learning pathway', '/profile': 'Skills profile', '/impact': 'SDG impact', '/global-skills-tracker': 'Global Skills Tracker' };
-    document.title = `${titles[location] ?? 'Page not found'} | FuturePath`;
-    const d = location === '/global-skills-tracker' ? 'Explore job-market trends and discover the skills employers need, via the official UNESCO-UNEVOC Global Skills Tracker.' : null;
+    document.title = `${t(titles[location] ?? 'Page not found')} | FuturePath`;
+    const d = t(location === '/global-skills-tracker' ? 'Explore job-market trends and discover the skills employers need, via the official UNESCO-UNEVOC Global Skills Tracker.' : 'Explore future-ready careers, understand your skills gaps and build a personalised, SDG-linked reskilling pathway with transparent public job-market signals.');
     const m = document.querySelector('meta[name="description"]');
-    if (d && m) { if (!m.getAttribute('data-orig')) m.setAttribute('data-orig', m.getAttribute('content') ?? ''); m.setAttribute('content', d); }
-    else if (m?.getAttribute('data-orig') != null) m.setAttribute('content', m.getAttribute('data-orig') ?? '');
-  }, [location]);
+    m?.setAttribute('content', d);
+  }, [location, t]);
   return <ErrorBoundary resetKey={location}>{children}</ErrorBoundary>;
 }
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <LanguageProvider><QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
           <StoreProvider>
@@ -54,7 +55,7 @@ function App() {
         </WouterRouter>
         <Toaster />
       </TooltipProvider>
-    </QueryClientProvider>
+    </QueryClientProvider></LanguageProvider>
   );
 }
 

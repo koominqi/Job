@@ -32,10 +32,15 @@ export async function matchRoles(profile: Profile) {
   };
 }
 
-export function buildPathway(profile: Profile, roleId: string) {
+export async function buildPathway(profile: Profile, roleId: string) {
   const role = roles.find(r => r.id === roleId);
   if (!role) return undefined;
-  const missing = role.skills.filter(id => !profile.skills.includes(id));
+  const roleOrder = new Map(role.skills.map((id, index) => [id, index]));
+  const report = await getSignals();
+  const shares = new Map(report.demand.map(item => [item.skillId, item.share]));
+  const missing = role.skills.filter(id => !profile.skills.includes(id)).sort((a, b) =>
+    (shares.get(b) ?? 0) - (shares.get(a) ?? 0) || roleOrder.get(a)! - roleOrder.get(b)!,
+  );
   let elapsedHours = 0;
   const steps = missing.map(id => {
     const resource = resources[id]!;
