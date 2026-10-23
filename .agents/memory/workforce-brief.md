@@ -20,3 +20,9 @@ Use transparent rule-based matching rather than claiming an LLM powers the app.
 **Why:** Explainable skill overlap and dated public signals meet the proof-of-concept needs without introducing fabricated career advice. Scores are planning aids, not hiring probabilities.
 
 **How to apply:** If introducing an LLM later, disclose the model, ground output in verified sources and preserve the explainable score breakdown.
+
+SDC provides Replit and RunPod, according to the team.
+
+**Why:** The team explicitly clarified the sponsor-provided platforms while preparing the submission.
+
+**How to apply:** Distinguish access to a sponsor-provided platform from actual use. Check the current implementation before claiming that either platform powers a feature.
