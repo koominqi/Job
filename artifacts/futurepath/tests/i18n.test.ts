@@ -8,7 +8,7 @@ import { contentMessages } from '../src/lib/i18n/content';
 import { guidanceMessages } from '../src/lib/i18n/guidance';
 import { translate } from '../src/lib/i18n';
 import { matchExplanation, pathwaySummary, signalWarning } from '../src/lib/i18n/career-text';
-import { earnedBadgeIds, shouldReplanPathway } from '../src/lib/learning';
+import { badgeShelf, shouldReplanPathway } from '../src/lib/learning';
 
 const dictionary = { ...messages, ...contentMessages, ...guidanceMessages };
 const root = new URL('../src/', import.meta.url);
@@ -100,11 +100,19 @@ test('dynamic score explanations retain weights, penalties and unavailable-feed 
   }
 });
 
-test('learning badges award milestones and stay separate from reversible step completion', () => {
-  assert.deepEqual(earnedBadgeIds(0, 3), []);
-  assert.deepEqual(earnedBadgeIds(1, 3), ['first-step']);
-  assert.deepEqual(earnedBadgeIds(3, 3), ['first-step', 'skill-builder', 'pathway-finished']);
-  assert.deepEqual(earnedBadgeIds(1, 0), []);
+test('badges: one per pathway skill plus a finisher trophy, all from reversible completion', () => {
+  const steps = [{ id: 'a', skillId: 'python' }, { id: 'b', skillId: 'sql' }, { id: 'c', skillId: 'cloud' }];
+  const none = badgeShelf(steps, []);
+  assert.deepEqual(none.skills.map((b) => [b.skillId, b.order, b.earned]), [['python', 1, false], ['sql', 2, false], ['cloud', 3, false]]);
+  assert.deepEqual([none.completed, none.earned, none.total, none.finished], [0, 0, 4, false]);
+  const some = badgeShelf(steps, ['b', 'stale-step-from-old-plan']);
+  assert.deepEqual(some.skills.filter((b) => b.earned).map((b) => b.skillId), ['sql']);
+  assert.deepEqual([some.completed, some.earned, some.finished], [1, 1, false]);
+  const all = badgeShelf(steps, ['c', 'a', 'b']);
+  assert.deepEqual([all.completed, all.earned, all.total, all.finished], [3, 4, 4, true]);
+  assert.deepEqual(badgeShelf(steps, ['a', 'b']).finished, false, 'undoing a step removes the trophy');
+  const empty = badgeShelf([], ['a']);
+  assert.deepEqual([empty.completed, empty.earned, empty.total, empty.finished], [0, 0, 0, false]);
 });
 
 test('a pathway re-plans only for a changed available snapshot and a selected role', () => {

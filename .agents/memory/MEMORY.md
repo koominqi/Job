@@ -1,2 +1,3 @@
 - [Workforce brief boundaries](workforce-brief.md) — synthetic-only demo, sourced signals, disclosed scenario assumptions and explainable rule-based matching.
-- [Localization boundaries](localization-boundaries.md) — translate owned guidance, preserve original source titles, and keep language changes independent of career data.
+- [Localization boundaries](localization-boundaries.md) — translate owned guidance, preserve original source titles, and keep language changes independent of career data; i18n test rules.
+- [FuturePath UI direction](ui-direction.md) — brief pages, sidebar-only journey, FAQ at bottom, no persona; unique medal per skill tied to the catalog.

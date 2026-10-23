@@ -1,16 +1,12 @@
-export const learningBadges = [
-  { id: 'first-step', target: 1, title: 'First step', description: 'Complete your first learning step.' },
-  { id: 'skill-builder', target: 3, title: 'Skill builder', description: 'Complete three learning steps.' },
-  { id: 'pathway-finished', target: Number.POSITIVE_INFINITY, title: 'Pathway finisher', description: 'Complete every step in this pathway.' },
-] as const;
+export type BadgeStep = { id: string; skillId: string };
+export type SkillBadge = BadgeStep & { order: number; earned: boolean };
 
-export type LearningBadgeId = (typeof learningBadges)[number]['id'];
-
-export function earnedBadgeIds(completed: number, total: number): LearningBadgeId[] {
-  if (total < 1) return [];
-  return learningBadges.filter((badge) =>
-    badge.id === 'pathway-finished' ? completed >= total : completed >= badge.target,
-  ).map((badge) => badge.id);
+/** One badge per pathway skill plus a finisher trophy; all derived from self-reported completion. */
+export function badgeShelf(steps: BadgeStep[], done: string[]) {
+  const skills: SkillBadge[] = steps.map((step, index) => ({ ...step, order: index + 1, earned: done.includes(step.id) }));
+  const completed = skills.filter((badge) => badge.earned).length;
+  const finished = skills.length > 0 && completed === skills.length;
+  return { skills, finished, completed, earned: completed + (finished ? 1 : 0), total: skills.length ? skills.length + 1 : 0 };
 }
 
 export function shouldReplanPathway(

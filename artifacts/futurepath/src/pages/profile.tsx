@@ -1,22 +1,23 @@
 import { useRef, useState, type ReactNode } from 'react';
 import { Link } from 'wouter';
-import { AlertTriangle, ArrowRight, Check, FileText, RotateCcw, Save, ShieldCheck, Upload, X } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Check, Clock, Compass, FileText, Gauge, RotateCcw, Save, Sparkles, Upload, X, type LucideIcon } from 'lucide-react';
 import { useFP, SYNTHETIC } from '@/lib/store';
 import { Head, Skel, ErrorBox } from '@/components/bits';
-import { JourneyRail, Explain, Fact, NextStep } from '@/components/guide';
+import { categoryStyle } from '@/components/badges';
+import { FAQ, Fact, NextLink } from '@/components/guide';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import type { ProfileInput } from '@workspace/api-client-react';
 import { useLanguage } from '@/lib/i18n';
-const SECTORS = ['Technology', 'Data & AI', 'Sustainability', 'Business', 'Design'];
+import { badgeShelf } from '@/lib/learning';
 const same = (a: ProfileInput, b: ProfileInput) => JSON.stringify({ ...a, skills: [...a.skills].sort(), interests: [...a.interests].sort() }) === JSON.stringify({ ...b, skills: [...b.skills].sort(), interests: [...b.interests].sort() });
 
-function Section({ n, title, desc, children, aside }: { n: number; title: string; desc: string; children: ReactNode; aside?: ReactNode }) {
+function Section({ id, icon: Icon, title, desc, children, aside }: { id: string; icon: LucideIcon; title: string; desc: string; children: ReactNode; aside?: ReactNode }) {
   const { t } = useLanguage();
   return (
-    <section className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6" aria-labelledby={`profile-sec-${n}`}>
+    <section className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6" aria-labelledby={`profile-${id}`}>
       <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0 max-w-xl">
-          <h2 id={`profile-sec-${n}`} className="flex items-center gap-2 font-display text-xl"><span className="grid size-6 place-items-center rounded-full bg-primary/10 font-mono text-xs text-primary">{n}</span>{t(title)}</h2>
+          <h2 id={`profile-${id}`} className="flex items-center gap-2.5 font-display text-xl"><span className="grid size-8 place-items-center rounded-xl bg-primary/10 text-primary"><Icon size={16} aria-hidden="true" /></span>{t(title)}</h2>
           <p className="mt-1 text-sm text-muted-foreground">{t(desc)}</p>
         </div>
         {aside}
@@ -28,7 +29,7 @@ function Section({ n, title, desc, children, aside }: { n: number; title: string
 
 export default function Profile() {
   const { t } = useLanguage();
-  const { profile, setProfile, catalog, roleId, pathway, done, earnedBadges } = useFP();
+  const { profile, setProfile, catalog, roleId, pathway, done } = useFP();
   const [d, setD] = useState<ProfileInput>(profile);
   const [saved, setSaved] = useState(false);
   const [confirm, setConfirm] = useState<null | 'save' | 'reset'>(null);
@@ -52,7 +53,7 @@ export default function Profile() {
   };
   const tog = (k: 'skills' | 'interests', v: string) => setD((x) => ({ ...x, [k]: x[k].includes(v) ? x[k].filter((y) => y !== v) : [...x[k], v] }));
   const save = (p: ProfileInput) => { setProfile(p); setSaved(true); setTimeout(() => setSaved(false), 2400); };
-  const hasPlan = Boolean(roleId || pathway || done.length || earnedBadges.length);
+  const hasPlan = Boolean(roleId || pathway || done.length);
   const dirty = !same(d, profile);
   const request = (kind: 'save' | 'reset') => {
     if (hasPlan) { setConfirm(kind); return; }
@@ -65,67 +66,63 @@ export default function Profile() {
   };
   const chip = (on: boolean) => `inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border transition-[background-color,border-color,transform] active:scale-95 motion-reduce:active:scale-100 ${on ? 'bg-primary text-primary-foreground border-primary' : 'bg-card hover:bg-muted hover:border-primary/40'}`;
   const cats = Array.from(new Set(catalog.data?.skills.map((s) => s.category) ?? []));
+  // Sector chips come from the catalog roles, so every choice can affect a score.
+  const sectors = Array.from(new Set(catalog.data?.roles.map((r) => r.sector) ?? []));
   const doneCount = pathway ? pathway.steps.filter((s) => done.includes(s.id)).length : 0;
+  const badgeCount = pathway ? badgeShelf(pathway.steps, done).earned : 0;
+  const count = (testId: string, n: number) => <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary" data-testid={testId} aria-live="polite">{t('{count} selected', { count: n })}</span>;
   return (<div>
-    <Head kicker="Profile" title="Tell us about Alex" sub="Alex is a synthetic demo person. Change the choices below to explore; do not enter real personal details." />
-    <JourneyRail current="profile" />
-
-    <section className="mb-6 rounded-2xl border border-primary/25 bg-primary/5 p-5" aria-labelledby="privacy-heading" data-testid="card-privacy">
-      <h2 id="privacy-heading" className="flex items-center gap-2 font-display text-lg"><ShieldCheck size={18} className="text-primary" aria-hidden="true" />{t('What is sent, and what stays here')}</h2>
-      <ul className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
-        <li><b className="font-medium">{t('Sent to the FuturePath API for matching:')}</b> {t('selected skill IDs, sector interests, years of experience, weekly study hours and scenario.')}</li>
-        <li><b className="font-medium">{t('Kept only in this browser:')}</b> {t('your saved profile, chosen pathway, completed steps and badges.')}</li>
-        <li className="sm:col-span-2"><b className="font-medium">{t('Never read, uploaded or saved:')}</b> {t('the content of any CV file you pick. The picker below only shows the file name locally.')}</li>
-      </ul>
-    </section>
-
-    <section className="mb-8 max-w-3xl rounded-2xl border bg-card shadow-sm p-5 sm:p-6" aria-labelledby="cv-upload-title">
-      <div className="flex items-start gap-3">
-        <div className="rounded-lg bg-accent/10 p-2 text-accent"><FileText size={20} aria-hidden="true" /></div>
-        <div className="min-w-0 flex-1">
-          <h2 id="cv-upload-title" className="font-display text-xl font-semibold">{t('CV upload preview')}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">{t('Choose a PDF, DOC, or DOCX file (up to 10 MB) to preview its name. This demo does not upload, read, save, or use your CV for recommendations. Please use a synthetic sample, not a real CV.')}</p>
-          <input ref={cvInput} id="cv-file" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="sr-only" aria-describedby="cv-upload-note cv-upload-status" onChange={(e) => chooseCv(e.currentTarget.files?.[0])} data-testid="input-cv" />
-          <label htmlFor="cv-file" className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-primary px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10 focus-within:ring-2 focus-within:ring-ring">
-            <Upload size={16} aria-hidden="true" /> {t('Choose a CV')}
-          </label>
-          <p id="cv-upload-note" className="sr-only">{t('The selected file remains in this browser tab and will not be uploaded or saved.')}</p>
-          <div id="cv-upload-status" aria-live="polite" className="mt-3">
-            {cvError && <p className="text-sm text-destructive" role="alert">{t(cvError)}</p>}
-            {cvFile && <div className="flex flex-wrap items-center gap-2 text-sm">
-              <FileText size={16} className="text-accent" aria-hidden="true" />
-              <span className="max-w-full break-all font-medium">{cvFile.name}</span>
-              <span className="text-muted-foreground">({(cvFile.size / (1024 * 1024)).toFixed(2)} MB)</span>
-              <button type="button" onClick={() => { setCvFile(null); setCvError(''); }} className="inline-flex items-center gap-1 rounded px-2 py-1 text-muted-foreground hover:bg-muted hover:text-foreground" aria-label={t('Remove {name}', { name: cvFile.name })} data-testid="button-remove-cv">
-                <X size={15} aria-hidden="true" /> {t('Remove')}
-              </button>
-              <p className="w-full text-xs text-muted-foreground">{t('Name preview only. Your skills below are still chosen by hand.')}</p>
-            </div>}
-          </div>
-        </div>
-      </div>
-    </section>
+    <Head kicker="Profile" title="Your skills profile" sub="A synthetic demo profile. Change anything below, but please do not enter real personal details." />
 
     {catalog.isLoading ? <Skel n={3} /> : catalog.isError || !catalog.data ? <ErrorBox msg="Skill catalog unavailable." retry={() => catalog.refetch()} /> : (<div className="space-y-5 max-w-3xl">
-      <Section n={1} title="Skills you already have" desc="Tap each skill you can already use at work or in study. Readiness compares these with the skills each role needs; a skill is either selected or not, with no levels." aside={<span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary" data-testid="text-skill-count" aria-live="polite">{t('{count} selected', { count: d.skills.length })}</span>}>
-        <div className="space-y-4">{cats.map((c) => (<div key={c}><h3 className="font-mono text-xs uppercase tracking-widest mb-2 text-muted-foreground">{t(c)}</h3><div className="flex flex-wrap gap-2">{catalog.data.skills.filter((s) => s.category === c).map((s) => { const on = d.skills.includes(s.id); return (<button key={s.id} type="button" aria-pressed={on} onClick={() => tog('skills', s.id)} className={chip(on)} data-testid={`chip-skill-${s.id}`}>{on && <Check size={13} aria-hidden="true" />}{t(s.name)}</button>); })}</div></div>))}</div>
+      <section className="rounded-2xl border border-dashed bg-card/70 p-4" aria-labelledby="cv-upload-title">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent"><FileText size={19} aria-hidden="true" /></span>
+          <div className="min-w-0 flex-1">
+            <h2 id="cv-upload-title" className="font-medium">{t('CV upload preview')}</h2>
+            <p className="text-xs text-muted-foreground">{t('Optional. Shows the file name only; nothing is uploaded or read.')}</p>
+          </div>
+          <input ref={cvInput} id="cv-file" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="peer sr-only" aria-describedby="cv-upload-note cv-upload-status" onChange={(e) => chooseCv(e.currentTarget.files?.[0])} data-testid="input-cv" />
+          <label htmlFor="cv-file" className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-primary px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10 peer-focus-visible:ring-2 peer-focus-visible:ring-ring">
+            <Upload size={16} aria-hidden="true" /> {t('Choose a CV')}
+          </label>
+        </div>
+        <p id="cv-upload-note" className="sr-only">{t('The selected file remains in this browser tab and will not be uploaded or saved.')}</p>
+        <div id="cv-upload-status" aria-live="polite">
+          {cvError && <p className="mt-3 text-sm text-destructive" role="alert">{t(cvError)}</p>}
+          {cvFile && <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+            <FileText size={16} className="text-accent" aria-hidden="true" />
+            <span className="max-w-full break-all font-medium">{cvFile.name}</span>
+            <span className="text-muted-foreground">({(cvFile.size / (1024 * 1024)).toFixed(2)} MB)</span>
+            <button type="button" onClick={() => { setCvFile(null); setCvError(''); }} className="inline-flex items-center gap-1 rounded px-2 py-1 text-muted-foreground hover:bg-muted hover:text-foreground" aria-label={t('Remove {name}', { name: cvFile.name })} data-testid="button-remove-cv">
+              <X size={15} aria-hidden="true" /> {t('Remove')}
+            </button>
+            <p className="w-full text-xs text-muted-foreground">{t('Name preview only. Your skills below are still chosen by hand.')}</p>
+          </div>}
+        </div>
+      </section>
+
+      <Section id="skills" icon={Sparkles} title="Skills you already have" desc="Tap the skills you can already use." aside={count('text-skill-count', d.skills.length)}>
+        <div className="space-y-4">{cats.map((c) => (<div key={c}>
+          <h3 className="mb-2 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground"><span className="size-2 rounded-full" style={{ background: categoryStyle(c).to }} aria-hidden="true" />{t(c)}</h3>
+          <div className="flex flex-wrap gap-2">{catalog.data.skills.filter((s) => s.category === c).map((s) => { const on = d.skills.includes(s.id); return (<button key={s.id} type="button" aria-pressed={on} onClick={() => tog('skills', s.id)} className={chip(on)} data-testid={`chip-skill-${s.id}`}>{on && <Check size={13} aria-hidden="true" />}{t(s.name)}</button>); })}</div>
+        </div>))}</div>
       </Section>
-      <Section n={2} title="Sectors that interest you" desc="Interest fit checks whether a role's sector is one you picked. It is worth 15% of the score." aside={<span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary" data-testid="text-interest-count">{t('{count} selected', { count: d.interests.length })}</span>}>
-        <div className="flex flex-wrap gap-2">{SECTORS.map((s) => { const on = d.interests.includes(s); return (<button key={s} type="button" aria-pressed={on} onClick={() => tog('interests', s)} className={chip(on)} data-testid={`chip-interest-${s}`}>{on && <Check size={13} aria-hidden="true" />}{t(s)}</button>); })}</div>
+      <Section id="sectors" icon={Compass} title="Sectors that interest you" desc="Picking a role's sector adds 15 points to its score (out of 100)." aside={count('text-interest-count', d.interests.length)}>
+        <div className="flex flex-wrap gap-2">{sectors.map((s) => { const on = d.interests.includes(s); return (<button key={s} type="button" aria-pressed={on} onClick={() => tog('interests', s)} className={chip(on)} data-testid={`chip-interest-${s}`}>{on && <Check size={13} aria-hidden="true" />}{t(s)}</button>); })}</div>
       </Section>
-      <Section n={3} title="Experience and study time" desc="Experience is context only and does not change any score. Weekly study hours set how many weeks each learning step takes in your plan; more hours means a shorter calendar, not less learning.">
+      <Section id="time" icon={Clock} title="Experience and study time" desc="Experience is context only. Weekly hours set the pace of your plan.">
         <div className="grid sm:grid-cols-2 gap-6">
           <label className="text-sm">{t('Years of experience:')} <b data-testid="text-years">{d.experienceYears}</b><input type="range" min={0} max={50} value={d.experienceYears} onChange={(e) => setD({ ...d, experienceYears: +e.target.value })} className="w-full accent-[hsl(var(--primary))]" data-testid="input-years" aria-describedby="years-help" /><span id="years-help" className="block text-xs text-muted-foreground">{t('0 to 50 years. Any work, internship or volunteering counts.')}</span></label>
           <label className="text-sm">{t('Hours per week:')} <b data-testid="text-hours">{d.weeklyHours}</b><input type="range" min={1} max={40} value={d.weeklyHours} onChange={(e) => setD({ ...d, weeklyHours: +e.target.value })} className="w-full accent-[hsl(var(--primary))]" data-testid="input-hours" aria-describedby="hours-help" /><span id="hours-help" className="block text-xs text-muted-foreground">{t('1 to 40 hours. Be realistic: a steady pace beats an ambitious one you cannot keep.')}</span></label>
         </div>
       </Section>
-      <Section n={4} title="How fast might AI change work?" desc="A scenario is an assumption you choose, not a prediction. It changes how much posting demand counts and how strongly roles with a declining outlook are adjusted.">
+      <Section id="scenario" icon={Gauge} title="How fast might AI change work?" desc="An assumption, not a prediction. Compare both on Role matches.">
         <div className="grid gap-2 sm:grid-cols-2">{(['moderate', 'fast'] as const).map((s) => { const on = d.scenario === s; return (
           <button key={s} type="button" aria-pressed={on} onClick={() => setD({ ...d, scenario: s })} className={`rounded-xl border p-4 text-left transition-colors ${on ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'bg-card hover:bg-muted/60'}`} data-testid={`chip-scenario-${s}`}>
             <span className="flex items-center justify-between gap-2 font-medium">{t(s === 'fast' ? 'Fast AI change' : 'Moderate change')}{on && <Check size={15} className="text-primary" aria-hidden="true" />}</span>
             <span className="mt-1 block text-xs text-muted-foreground">{t(s === 'fast' ? 'Weights: 55% skills + 15% interest + 30% posting demand; 18-point illustrative decline penalty.' : 'Weights: 65% skills + 15% interest + 20% posting demand; 8-point illustrative decline penalty.')}</span>
           </button>); })}</div>
-        <p className="mt-3 max-w-2xl text-sm text-muted-foreground">{t('Choose either scenario on Profile, or compare both with your current skills on Role matches. These are different assumptions, not predictions about what AI will do.')}</p>
       </Section>
 
       <section className="sticky bottom-3 z-10 rounded-2xl border bg-card/95 p-4 shadow-lg backdrop-blur" aria-label={t('Save your profile')}>
@@ -138,16 +135,19 @@ export default function Profile() {
           {!dirty && <Link href="/matches" className="ml-auto inline-flex items-center gap-1 text-sm font-medium text-primary underline" data-testid="link-profile-matches">{t('See matches')} <ArrowRight size={14} aria-hidden="true" /></Link>}
         </div>
       </section>
-
-      <Explain title="What happens after I save?" testId="explain-profile-save">
-        <Fact label="1.">{t('Your choices are stored in this browser and sent to the matching API.')}</Fact>
-        <Fact label="2.">{t('Every role is re-scored out of 100 on Role matches.')}</Fact>
-        <Fact label="3.">{t('Any chosen role, pathway, completed steps and badges are cleared, because they were built for the old profile.')}</Fact>
-        <Fact label="4.">{t('Pick a role again to build a fresh learning plan.')}</Fact>
-      </Explain>
     </div>)}
 
-    <NextStep href="/radar" title="Explore the job-market signals" body="Save any profile changes first. Continue to see the dated sources used in matching." testId="link-next-radar" />
+    <NextLink href="/radar" label="Signal radar" testId="link-next-radar" />
+    <FAQ testId="faq-profile" items={[
+      { id: 'privacy', q: t('What is sent, and what stays here'), a: <>
+        <Fact label="Sent to the FuturePath API for matching:">{t('selected skill IDs, sector interests, years of experience, weekly study hours and scenario.')}</Fact>
+        <Fact label="Kept only in this browser:">{t('your saved profile, chosen pathway, completed steps and badges.')}</Fact>
+        <Fact label="Never read, uploaded or saved:">{t('the content of any CV file you pick. Only its name and size are shown, on this device.')}</Fact>
+      </> },
+      { id: 'readiness', q: t('How does readiness work?'), a: <p>{t('Readiness is the share of a role\'s listed skills you selected. Skills have no levels: each is either selected or not.')}</p> },
+      { id: 'scenario', q: t('What do the scenarios change?'), a: <p>{t('A scenario is an assumption you choose, not a prediction. It changes how much posting demand counts and how strongly roles with a declining outlook are adjusted.')}</p> },
+      { id: 'save', q: t('What happens after I save?'), a: <p>{t('Every role is re-scored out of 100 on Role matches.')} {t('Any chosen role, pathway, completed steps and badges are cleared, because they were built for the old profile.')} {t('Pick a role again to build a fresh learning plan.')}</p> },
+    ]} />
 
     <AlertDialog open={confirm !== null} onOpenChange={(o) => { if (!o) setConfirm(null); }}>
       <AlertDialogContent data-testid="dialog-confirm-profile">
@@ -159,7 +159,7 @@ export default function Profile() {
           {pathway && <li>{t('Chosen role and pathway: {role}', { role: t(pathway.role.title) })}</li>}
           {!pathway && roleId && <li>{t('Your chosen role')}</li>}
           <li>{t('{count} completed steps', { count: doneCount || done.length })}</li>
-          <li>{t('{count} badges', { count: earnedBadges.length })}</li>
+          <li>{t('{count} badges', { count: badgeCount })}</li>
         </ul>
         <p className="text-xs text-muted-foreground">{t('This cannot be undone. Cancel to keep everything as it is.')}</p>
         <AlertDialogFooter>
