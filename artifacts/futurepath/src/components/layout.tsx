@@ -29,7 +29,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <main className="min-w-0 flex-1 px-5 py-8 md:px-12 md:py-12 max-w-6xl mx-auto w-full">
         {signalPlanUpdate && <SignalPlanNotice status={signalPlanUpdate} fetchedAt={signals.data?.fetchedAt} onDismiss={dismissSignalPlanUpdate} onRetry={rebuildPathway} />}
         {children}
-        <footer className="mt-16 pt-6 border-t text-xs text-muted-foreground">{t('Job signals:')} <a className="underline" href="https://remotive.com" target="_blank" rel="noreferrer">Remotive</a> {t('(global remote feed, not representative of Malaysia). Profile is synthetic and stored only in this browser.')}</footer>
+        <footer className="mt-16 pt-6 border-t text-xs text-muted-foreground">{t('Job signals:')} <a className="underline" href="https://remotive.com" target="_blank" rel="noreferrer">Remotive</a> {t('(global remote feed, not representative of Malaysia).')} {t('Your profile, pathway, completed steps and badges stay in this browser. Matching sends only selected skill IDs, interests, experience, study hours and scenario; CV files are never read or uploaded.')}</footer>
       </main>
     </div>);
 }

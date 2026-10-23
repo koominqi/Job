@@ -56,8 +56,13 @@ function useStore() {
   const key = JSON.stringify(profile) + (signals.data?.fetchedAt ?? '') + (signals.data?.status ?? '');
   useEffect(() => { mm.current({ data: profile }); /* eslint-disable-next-line */ }, [key]);
   const selectRole = useCallback((id: string, onDone?: () => void) => {
-    setRoleId(id); setDone([]); setSignalPlanUpdate(null);
-    path.mutate({ data: { profile, roleId: id } }, { onSuccess: (p) => { setPathway(p); onDone?.(); } });
+    path.mutate({ data: { profile, roleId: id } }, { onSuccess: (p) => {
+      setRoleId(id);
+      setDone([]);
+      setSignalPlanUpdate(null);
+      setPathway(p);
+      onDone?.();
+    } });
   }, [profile, path, setRoleId, setDone, setPathway]);
   const toggle = (id: string) => {
     const wasDone = done.includes(id);

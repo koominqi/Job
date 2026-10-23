@@ -5,11 +5,12 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { messages } from '../src/lib/i18n/messages';
 import { contentMessages } from '../src/lib/i18n/content';
+import { guidanceMessages } from '../src/lib/i18n/guidance';
 import { translate } from '../src/lib/i18n';
 import { matchExplanation, pathwaySummary, signalWarning } from '../src/lib/i18n/career-text';
 import { earnedBadgeIds, shouldReplanPathway } from '../src/lib/learning';
 
-const dictionary = { ...messages, ...contentMessages };
+const dictionary = { ...messages, ...contentMessages, ...guidanceMessages };
 const root = new URL('../src/', import.meta.url);
 const untranslatedNames = new Set(['Python', 'SQL']);
 
@@ -25,25 +26,40 @@ test('every translation has both languages and preserves interpolation variables
 });
 
 test('all literal translation calls and shared heading/error labels have translations', () => {
+  const ownedComponents = (directory: URL): URL[] =>
+    readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+      if (entry.isDirectory()) return entry.name === 'ui' ? [] : ownedComponents(new URL(`${entry.name}/`, directory));
+      return entry.name.endsWith('.tsx') ? [new URL(entry.name, directory)] : [];
+    });
   const files = [
-    ...readdirSync(new URL('pages/', root)).filter((f) => f.endsWith('.tsx')).map((f) => new URL(`pages/${f}`, root)),
-    ...['App.tsx', 'components/layout.tsx', 'components/bits.tsx', 'components/error-boundary.tsx', 'lib/i18n/career-text.ts'].map((f) => new URL(f, root)),
+    ...ownedComponents(new URL('pages/', root)),
+    ...ownedComponents(new URL('components/', root)),
+    ...['App.tsx', 'lib/i18n/career-text.ts'].map((f) => new URL(f, root)),
   ];
   let checked = 0;
+  const missing: string[] = [];
   for (const file of files) {
     const source = ts.createSourceFile(fileURLToPath(file), readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
     const check = (text: string) => {
-      if (!text || untranslatedNames.has(text)) return;
-      assert.ok(dictionary[text], `${file.pathname}: missing translation: ${text}`);
+      if (!text || untranslatedNames.has(text) || /^\d+[.)]?$/.test(text)) return;
+      if (!dictionary[text]) missing.push(`${file.pathname}: ${text}`);
       checked++;
     };
+    function checkStaticAlternatives(node: ts.Node) {
+      if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) check(node.text);
+      if (ts.isConditionalExpression(node)) {
+        checkStaticAlternatives(node.whenTrue);
+        checkStaticAlternatives(node.whenFalse);
+      }
+    }
     function visit(node: ts.Node) {
-      if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === 't' && node.arguments[0] && ts.isStringLiteral(node.arguments[0])) check(node.arguments[0].text);
-      if (ts.isJsxAttribute(node) && ['title', 'sub', 'kicker', 'msg', 'body'].includes(node.name.getText(source)) && node.initializer && ts.isStringLiteral(node.initializer)) check(node.initializer.text);
+      if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === 't' && node.arguments[0]) checkStaticAlternatives(node.arguments[0]);
+      if (ts.isJsxAttribute(node) && ['title', 'sub', 'kicker', 'msg', 'body', 'desc', 'label'].includes(node.name.getText(source)) && node.initializer && ts.isStringLiteral(node.initializer)) check(node.initializer.text);
       ts.forEachChild(node, visit);
     }
     visit(source);
   }
+  assert.deepEqual(missing, [], 'Owned guidance must be translated in both supported non-English languages');
   assert.ok(checked > 100);
 });
 

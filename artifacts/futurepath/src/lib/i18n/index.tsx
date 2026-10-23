@@ -1,11 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { messages } from './messages';
 import { contentMessages } from './content';
+import { guidanceMessages } from './guidance';
 
 export type Language = 'en' | 'ms' | 'zh-CN';
 export const languages = [{ value: 'en', label: 'English' }, { value: 'ms', label: 'Bahasa Malaysia' }, { value: 'zh-CN', label: '简体中文' }] as const;
 const locales = { en: 'en-MY', ms: 'ms-MY', 'zh-CN': 'zh-CN' } as const;
-const dictionary = { ...messages, ...contentMessages };
+const dictionary = { ...messages, ...contentMessages, ...guidanceMessages };
 export function translate(language: Language, key: string, params: Record<string, string | number> = {}) {
   const translated = language === 'en' ? key : dictionary[key]?.[language === 'ms' ? 0 : 1] ?? key;
   return translated.replace(/\{(\w+)\}/g, (match, name: string) => String(params[name] ?? match));
